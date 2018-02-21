@@ -1,6 +1,7 @@
 <?php
 /**
  * @author Semih Serhat Karakaya <karakayasemi@itu.edu.tr>
+ * @author Michael Usher <michael.usher@aarnet.edu.au>
  * @copyright Copyright (c) 2017, ownCloud GmbH.
  * @license AGPL-3.0
  *

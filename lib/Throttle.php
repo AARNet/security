@@ -1,6 +1,7 @@
 <?php
 /**
  * @author Semih Serhat Karakaya <karakayasemi@itu.edu.tr>
+ * @author Michael Usher <michael.usher@aarnet.edu.au>
  *
  * @copyright Copyright (c) 2017, ownCloud GmbH
  * @license AGPL-3.0
@@ -32,78 +33,78 @@ use OCP\IL10N;
  */
 class Throttle {
 
-    /**
-     * @var \OCA\Security\Db\DbService $connection
-     */
-    protected $dbConnection;
+	/**
+	 * @var \OCA\Security\Db\DbService $connection
+	 */
+	protected $dbConnection;
 
-    /**
-     * @var SecurityConfig $config
-     */
-    protected $config;
+	/**
+	 * @var SecurityConfig $config
+	 */
+	protected $config;
 
-    /**
-     * @var IL10N $l
-     */
-    protected $l;
+	/**
+	 * @var IL10N $l
+	 */
+	protected $l;
 
-    /**
-     * @var ITimeFactory $timeFactory
-     */
-    protected $timeFactory;
+	/**
+	 * @var ITimeFactory $timeFactory
+	 */
+	protected $timeFactory;
 
-    /**
-     * @param \OCA\Security\Db\DbService $dbConnection
-     * @param SecurityConfig $config
-     * @param IL10N $l
-     * @param ITimeFactory $timeFactory
-     */
-    public function __construct(DbService $dbConnection, SecurityConfig $config, IL10N $l, ITimeFactory $timeFactory) {
-        $this->dbConnection = $dbConnection;
-        $this->config = $config;
-        $this->l = $l;
-        $this->timeFactory = $timeFactory;
-    }
+	/**
+	 * @param \OCA\Security\Db\DbService $dbConnection
+	 * @param SecurityConfig $config
+	 * @param IL10N $l
+	 * @param ITimeFactory $timeFactory
+	 */
+	public function __construct(DbService $dbConnection, SecurityConfig $config, IL10N $l, ITimeFactory $timeFactory) {
+		$this->dbConnection = $dbConnection;
+		$this->config = $config;
+		$this->l = $l;
+		$this->timeFactory = $timeFactory;
+	}
 
-    /**
-     * @param string $uid
-     * @param string $ip
-     * @return void
-     */
-    public function addFailedLoginAttempt($uid, $ip) {
-        $this->dbConnection->addFailedLoginAttempt($uid, $ip);
-    }
+	/**
+	 * @param string $uid
+	 * @param string $ip
+	 * @return void
+	 */
+	public function addFailedLoginAttempt($uid, $ip) {
+		$this->dbConnection->addFailedLoginAttempt($uid, $ip);
+	}
 
-    /**
-     * @param string $uid
-     * @param string $ip
-     * @throws LoginException
-     */
-    public function applyBruteForcePolicy($uid ,$ip) {
-        $banPeriod = $this->config->getBruteForceProtectionBanPeriod();
-        $banUntil = $this->dbConnection->getLastFailedLoginAttemptTimeForIp($ip)+$banPeriod;
-        if($this->dbConnection->getSuspiciousActivityCountForUidIpCombination($uid, $ip) >=
-            $this->config->getBruteForceProtectionFailTolerance() &&
-            $banUntil > $this->timeFactory->getTime()) {
-            throw new LoginException($this->l->t("Too many failed login attempts. Try again in %s minutes.",
-                ceil($banPeriod/60))
-            );
-        }
-    }
+	/**
+	 * @param string $uid
+	 * @param string $ip
+	 * @throws LoginException
+	 */
+	public function applyBruteForcePolicy($uid ,$ip) {
+		$banPeriod = $this->config->getBruteForceProtectionBanPeriod();
+		$banUntil = $this->dbConnection->getLastFailedLoginAttemptTimeForIp($ip)+$banPeriod;
+		if($this->dbConnection->getSuspiciousActivityCountForUidIpCombination($uid, $ip) >=
+			$this->config->getBruteForceProtectionFailTolerance() &&
+			$banUntil > $this->timeFactory->getTime()) {
+			throw new LoginException($this->l->t("Too many failed login attempts. Try again in %s minutes.",
+				ceil($banPeriod/60))
+			);
+		}
+	}
 
-    /**
-     * @param string $ip
-     * @return void
-     */
-    public function clearSuspiciousAttemptsForIp($ip) {
-        $this->dbConnection->deleteSuspiciousAttemptsForIp($ip);
-    }
+	/**
+	 * @param string $ip
+	 * @return void
+	 */
+	public function clearSuspiciousAttemptsForIp($ip) {
+		$this->dbConnection->deleteSuspiciousAttemptsForIp($ip);
+	}
 
-    /**
-     * @param string $ip
-     * @return void
-     */
-    public function clearSuspiciousAttemptsForUidIpCombination($uid, $ip) {
-        $this->dbConnection->deleteSuspiciousAttemptsForUidIpCombination($uid, $ip);
-    }
+	/**
+	 * @param string $ip
+	 * @return void
+	 */
+	public function clearSuspiciousAttemptsForUidIpCombination($uid, $ip) {
+		$this->dbConnection->deleteSuspiciousAttemptsForUidIpCombination($uid, $ip);
+	}
 }

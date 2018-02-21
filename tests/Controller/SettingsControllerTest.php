@@ -1,6 +1,7 @@
 <?php
 /**
  * @author Semih Serhat Karakaya <karakayasemi@itu.edu.tr>
+ * @author Michael Usher <michael.usher@aarnet.edu.au>
  *
  * @license GNU AGPL version 3 or any later version
  *
@@ -32,6 +33,7 @@ class SettingsControllerTest extends TestCase {
 	private $config;
 	/** @var SettingsController */
 	private $controller;
+
 	protected function setUp() {
 		parent::setUp();
 		$this->request = $this->getMockBuilder(IRequest::class)->getMock();
@@ -40,13 +42,10 @@ class SettingsControllerTest extends TestCase {
 			->getMock();
 		$this->controller = new SettingsController('security', $this->request, $this->config);
 	}
+
 	public function testState() {
 		$expected = [
 			'bruteForceProtectionState' => true,
-			'minPassLength' => 8,
-			'enforceUpperLowerState' => true,
-			'enforceNumericalCharactersState' => true,
-			'enforceSpecialCharactersState' => true
 		];
 		$this->config->expects($this->exactly(1))
 			->method('getAllSecurityConfigs')

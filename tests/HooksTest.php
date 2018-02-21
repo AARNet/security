@@ -1,6 +1,7 @@
 <?php
 /**
  * @author Semih Serhat Karakaya <karakayasemi@itu.edu.tr>
+ * @author Michael Usher <michael.usher@aarnet.edu.au>
  *
  * @copyright Copyright (c) 2017, ownCloud GmbH
  * @license AGPL-3.0
@@ -33,86 +34,76 @@ use Test\TestCase;
 
 class HooksTest extends TestCase {
 
-    /** @var  Hooks */
-    private $hooks;
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject | Manager
-     */
-    private $userManagerMock;
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject | Throttle
-     */
-    private $throttleMock;
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject | IRequest
-     */
-    private $requestMock;
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject | PasswordValidator
-     */
-    private $passwordValidatorMock;
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject | EventDispatcher
-     */
-    private $dispatcherMock;
+	/** @var  Hooks */
+	private $hooks;
+	/**
+	 * @var \PHPUnit_Framework_MockObject_MockObject | Manager
+	 */
+	private $userManagerMock;
+	/**
+	 * @var \PHPUnit_Framework_MockObject_MockObject | Throttle
+	 */
+	private $throttleMock;
+	/**
+	 * @var \PHPUnit_Framework_MockObject_MockObject | IRequest
+	 */
+	private $requestMock;
+	/**
+	 * @var \PHPUnit_Framework_MockObject_MockObject | EventDispatcher
+	 */
+	private $dispatcherMock;
 
-    public function setUp() {
-        parent::setUp();
+	public function setUp() {
+		parent::setUp();
 
-        $this->userManagerMock = $this->getMockBuilder('\OC\User\Manager')
-            ->disableOriginalConstructor()
-            ->getMock();
+		$this->userManagerMock = $this->getMockBuilder('\OC\User\Manager')
+			->disableOriginalConstructor()
+			->getMock();
 
-        $this->throttleMock = $this->getMockBuilder('OCA\Security\Throttle')
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->requestMock = $this->getMockBuilder('OCP\IRequest')
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->passwordValidatorMock = $this->getMockBuilder('OCA\Security\PasswordValidator')
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->dispatcherMock = $this->getMockBuilder('Symfony\Component\EventDispatcher\EventDispatcher')
-            ->disableOriginalConstructor()
-            ->getMock();
+		$this->throttleMock = $this->getMockBuilder('OCA\Security\Throttle')
+			->disableOriginalConstructor()
+			->getMock();
+		$this->requestMock = $this->getMockBuilder('OCP\IRequest')
+			->disableOriginalConstructor()
+			->getMock();
+		$this->dispatcherMock = $this->getMockBuilder('Symfony\Component\EventDispatcher\EventDispatcher')
+			->disableOriginalConstructor()
+			->getMock();
 
-        $this->hooks = new Hooks(
-            $this->userManagerMock,
-            $this->throttleMock,
-            $this->requestMock,
-            $this->passwordValidatorMock,
-            $this->dispatcherMock);
-    }
+		$this->hooks = new Hooks(
+			$this->userManagerMock,
+			$this->throttleMock,
+			$this->requestMock,
+			$this->dispatcherMock);
+	}
 
-    public function testRegister() {
-        $this->userManagerMock->expects($this->exactly(3))
-            ->method('listen');
-        $this->dispatcherMock->expects($this->exactly(2))
-            ->method('addListener');
-        $this->hooks->register();
-    }
+	public function testRegister() {
+		$this->userManagerMock->expects($this->exactly(3))
+			->method('listen');
+		$this->hooks->register();
+	}
 
-    public function testFailedLoginCallback() {
-        $this->throttleMock->expects($this->once())
-            ->method('addFailedLoginAttempt');
+	public function testFailedLoginCallback() {
+		$this->throttleMock->expects($this->once())
+			->method('addFailedLoginAttempt');
 
-        $this->hooks->failedLoginCallback("test");
-        $this->assertTrue(true);
-    }
+		$this->hooks->failedLoginCallback("test");
+		$this->assertTrue(true);
+	}
 
-    public function testPostLoginCallback() {
-        $this->throttleMock->expects($this->once())
-            ->method('clearSuspiciousAttemptsForUidIpCombination');
+	public function testPostLoginCallback() {
+		$this->throttleMock->expects($this->once())
+			->method('clearSuspiciousAttemptsForUidIpCombination');
 
-        $this->hooks->postLoginCallback("test");
-        $this->assertTrue(true);
-    }
+		$this->hooks->postLoginCallback("test");
+		$this->assertTrue(true);
+	}
 
-    public function testPreLoginCallback() {
-        $this->throttleMock->expects($this->once())
-            ->method('applyBruteForcePolicy');
+	public function testPreLoginCallback() {
+		$this->throttleMock->expects($this->once())
+			->method('applyBruteForcePolicy');
 
-        $this->hooks->preLoginCallback('test');
-        $this->assertTrue(true);
-    }
+		$this->hooks->preLoginCallback('test');
+		$this->assertTrue(true);
+	}
 }
